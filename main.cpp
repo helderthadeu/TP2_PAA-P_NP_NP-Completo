@@ -1,8 +1,10 @@
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
 #include <time.h>
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 using namespace chrono;
@@ -75,6 +77,41 @@ vector<vector<int>> memoization_knapsack(int W, vector<int> &val, vector<int> &w
         }
     }
     return dp;
+}
+
+struct KnapsackMemoizationResult {
+    int maxValue;              // Valor máximo conseguido
+    vector<int> selectedItems; // Índices dos itens escolhidos (0-based)
+};
+
+KnapsackMemoizationResult memoization_knapsack_with_items(int W, vector<int> &val, vector<int> &wt) {
+
+    vector<vector<int>> dp = memoization_knapsack(W, val, wt);
+    int n = wt.size();
+
+    int res = dp[n][W]; // Valor ótimo final
+    int w_atual = W;    // Capacidade restante para rastreio
+    vector<int> itens;
+
+    for (int i = n; i > 0 && res > 0; i--) {
+        // Se o valor atual é igual ao da linha de cima, o item i NÃO foi incluído
+        if (res == dp[i - 1][w_atual]) {
+            continue;
+        } 
+        else {
+            // O item i foi incluído
+            // Como os vetores val e wt são 0-indexados, o item i na matriz é o i-1 nos vetores
+            itens.push_back(i - 1); 
+            
+            // Subtrai o valor do item para continuar a busca
+            res -= val[i - 1];
+            // Subtrai o peso do item da capacidade atual
+            w_atual -= wt[i - 1];
+        }
+    }
+
+    // Retorna o resultado (valor ótimo e vetor de itens)
+    return {dp[n][W], itens};
 }
 
 int greedy_knapsack(int W, vector<int> &val, vector<int> &wt)
