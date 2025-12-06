@@ -30,28 +30,36 @@ bool compareRatio(const Item &a, const Item &b)
     return r1 > r2;
 }
 
+// Função recursiva para resolver o problema da mochila 0/1
+// W: Capacidade restante da mochila
+// val: Vetor com os valores (utilidades) dos itens
+// wt: Vetor com os pesos dos itens
+// n: Índice do item atual sendo considerado (de n até 1)
 int linearKnapsackRec(int W, vector<int> &val, vector<int> &wt, int n)
 {
-
-    // Base Case
+    // Caso Base: Se não há mais itens ou a capacidade da mochila é 0,
+    // o valor acumulado é 0.
     if (n == 0 || W == 0)
         return 0;
 
     int pick = 0;
 
-    // Pick nth item if it does not exceed the capacity of knapsack
+    // Opção 1: Incluir o n-ésimo item (se o peso dele couber na capacidade atual)
+    // O índice no vetor é n-1 pois vetores em C++ são 0-indexed.
     if (wt[n - 1] <= W)
         pick = val[n - 1] + linearKnapsackRec(W - wt[n - 1], val, wt, n - 1);
 
-    // Don't pick the nth item
+    // Opção 2: Não incluir o n-ésimo item e passar para o próximo
     int notPick = linearKnapsackRec(W, val, wt, n - 1);
 
+    // Retorna o valor máximo entre incluir ou não incluir o item atual
     return max(pick, notPick);
 }
 
+// Função wrapper para iniciar a chamada recursiva
 int linearKnapsack(int W, vector<int> &val, vector<int> &wt)
 {
-    int n = val.size();
+    int n = val.size(); // Número total de itens
     return linearKnapsackRec(W, val, wt, n);
 }
 
