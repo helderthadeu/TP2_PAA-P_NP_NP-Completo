@@ -9,10 +9,10 @@
 using namespace std;
 using namespace chrono;
 
-#define SIZE_KNAPSACK 100
-#define MAX_WEIGHT 100
-#define MAX_VAL 100
-#define CAPACITY 100
+#define SIZE_KNAPSACK 10
+#define MAX_WEIGHT 10
+#define MAX_VAL 10
+#define CAPACITY 10
 
 // Estrutura para manter os dados do item unidos
 struct Item
