@@ -9,10 +9,10 @@
 using namespace std;
 using namespace chrono;
 
-#define SIZE_KNAPSACK 5
-#define MAX_WEIGHT 5
-#define MAX_VAL 5
-#define CAPACITY 5
+#define SIZE_KNAPSACK 100
+#define MAX_WEIGHT 100
+#define MAX_VAL 100
+#define CAPACITY 100
 
 // Estrutura para manter os dados do item unidos
 struct Item
@@ -148,9 +148,6 @@ int greedy_knapsack(int W, vector<int> &val, vector<int> &wt)
         {
             current_weight += items[i].wt;
             solution_value += items[i].val;
-
-            // Debug: Mostra quais itens foram escolhidos
-            // cout << "Item escolhido: " << items[i].id << " (Val: " << items[i].val << ", Peso: " << items[i].wt << ")\n";
         }
     }
 
@@ -167,13 +164,20 @@ int main()
 
     double avg_percentage_difference = 0;
     int k = 0;
+    FILE *fp = fopen("results.txt", "w");
+    FILE *fp2 = fopen("table_dynamic_program.txt", "w");
+    FILE *fp3 = fopen("items_selected_dynamic_program.txt", "w");
+    FILE *fp4 = fopen("inputs.txt", "w");
+    FILE *fp5 = fopen("execution_times.txt", "w");
     for (k = 0; k < 100; k++)
     {
         for (int i = 0; i < SIZE_KNAPSACK; i++)
         {
-            val[i] = rand() % MAX_VAL;   // Random values for item values
-            wt[i] = rand() % MAX_WEIGHT; // Random weights
+            val[i] = (rand() % MAX_VAL) + 1;   // Random values for item values
+            wt[i] = (rand() % MAX_WEIGHT) + 1; // Random weights
+            fprintf(fp4, "Item %d: Value = %d, Weight = %d\n", i + 1, val[i], wt[i]);
         }
+        fprintf(fp4, "Knapsack Capacity: %d\n\n", W);
 
         auto start = high_resolution_clock::now();
         vector<vector<int>> dp = memoization_knapsack(W, val, wt);
@@ -181,21 +185,33 @@ int main()
         auto end = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(end - start);
         cout << "Tempo de execucao em programacao dinamica: " << duration.count() << " ms " << endl;
+        cout << "Itens selecionados na programacao dinamica: ";
+        KnapsackMemoizationResult result = memoization_knapsack_with_items(W, val, wt);
+        for (int index : result.selectedItems) {
+            cout << "(" << "Value: " << val[index] << ", Weight: " << wt[index] << ") ";
+            fprintf(fp3, "Item %d: Value = %d, Weight = %d\n", index + 1, val[index], wt[index]);
+        }
+        fprintf(fp3, "\n", result.maxValue);
         cout << "Solucao completa usando programacao dinamica: " << endl;
         for (int i = 0; i <= val.size(); i++)
         {
             for (int j = 0; j <= W; j++)
             {
                 cout << dp[i][j] << " ";
+                fprintf(fp2, "%d ", dp[i][j]);
             }
             cout << endl;
+            fprintf(fp2, "\n");
         }
+        fprintf(fp2, "\n");
+        fprintf(fp5, "Dynamic Programming: %lld ms\n", duration.count());
 
         start = high_resolution_clock::now();
         cout << "Linear: " << linearKnapsack(W, val, wt) << endl;
         end = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(end - start);
         cout << "Tempo de execucao em linear: " << duration.count() << " ms\n";
+        fprintf(fp5, "Linear: %lld ms\n", duration.count());
 
         start = high_resolution_clock::now();
         int greedy_solution = greedy_knapsack(W, val, wt);
@@ -207,7 +223,12 @@ int main()
         cout << "Diferenca entre programacao dinamica e abordagem gulosa: " << percentage_difference << endl
              << endl;
         avg_percentage_difference += percentage_difference;
-        this_thread::sleep_for(chrono::milliseconds(500));
+        fprintf(fp5, "Greedy: %lld ms\n", duration.count());
+        fprintf(fp5, "\n");
+
+        fprintf(fp, "%d %d %d\n\n", dp[val.size()][W], linearKnapsack(W, val, wt), greedy_solution);
+
+        this_thread::sleep_for(chrono::milliseconds(50));
     }
     avg_percentage_difference /= k;
     cout << "Diferenca entre programacao dinamica e abordagem gulosa media: " << avg_percentage_difference << endl
